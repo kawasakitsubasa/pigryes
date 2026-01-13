@@ -12,7 +12,7 @@
     @csrf
 
     <div>
-        <label>現在の体重</label><br>
+        <label>現在の体重(kg)</label><br>
         <input type="number" step="0.1" name="current_weight" value="{{ old('current_weight') }}">
         @error('current_weight')
             <p style="color:red;">{{ $message }}</p>
@@ -22,7 +22,7 @@
     <br>
 
     <div>
-        <label>目標の体重</label><br>
+        <label>目標の体重(kg)</label><br>
         <input type="number" step="0.1" name="target_weight" value="{{ old('target_weight') }}">
         @error('target_weight')
             <p style="color:red;">{{ $message }}</p>
