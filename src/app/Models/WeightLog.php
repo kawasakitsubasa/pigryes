@@ -15,6 +15,7 @@ class WeightLog extends Model
         'weight',
         'calories',
         'exercise_minutes',
+        'exercise_content', 
     ];
 
     protected $casts = [
