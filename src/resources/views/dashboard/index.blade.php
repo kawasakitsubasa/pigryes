@@ -11,47 +11,92 @@
             background: #f7f7f7;
         }
 
-        h1 {
-            margin-bottom: 16px;
+        /* ===== ヘッダー ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: #fff;
+            border-bottom: 1px solid #eee;
         }
 
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff7ac9;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: #fff;
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .header-btn:hover {
+            background: #f5f5f5;
+        }
+
+        /* ===== メイン ===== */
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 24px auto;
             background: #fff;
             padding: 24px;
             border-radius: 12px;
         }
 
-        /* ===== 検索フォーム ===== */
+        /* ===== 検索＋追加 ===== */
+        .search-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
         .search-area {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 12px;
         }
 
         .search-area input[type="date"] {
             padding: 6px;
         }
 
-        .search-area button,
-        .search-area a {
+        .search-btn {
             padding: 6px 12px;
             border-radius: 6px;
             border: none;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .search-btn {
             background: #888;
             color: #fff;
         }
 
         .reset-btn {
-            background: #ddd;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background: #fff;
+            text-decoration: none;
             color: #333;
+        }
+
+        .add-btn {
+            padding: 10px 18px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #8aa3ff, #ff7ac9);
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
         }
 
         .result-text {
@@ -74,10 +119,6 @@
             text-align: center;
         }
 
-        .summary-box p {
-            margin: 4px 0;
-        }
-
         .summary-value {
             font-size: 24px;
             font-weight: bold;
@@ -90,9 +131,9 @@
         }
 
         th {
-            text-align: left;
             border-bottom: 2px solid #ddd;
             padding: 8px;
+            text-align: left;
         }
 
         td {
@@ -101,20 +142,14 @@
         }
 
         tbody tr:hover {
-            background: #faf6ff; /* hover */
+            background: #faf6ff;
         }
 
-        /* えんぴつ */
         .edit-btn {
-            text-decoration: none;
             font-size: 18px;
+            text-decoration: none;
         }
 
-        .edit-btn:hover {
-            opacity: 0.7;
-        }
-
-        /* ページネーション */
         .pagination {
             margin-top: 16px;
             display: flex;
@@ -124,58 +159,65 @@
 </head>
 <body>
 
+{{-- ===== ヘッダー ===== --}}
+<header class="header">
+    <span class="logo">PiGLy</span>
+
+    <div class="header-right">
+        <a href="{{ route('target.edit') }}" class="header-btn">⚙ 目標体重設定</a>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="header-btn">🚪 ログアウト</button>
+        </form>
+    </div>
+</header>
+
+{{-- ===== メイン ===== --}}
 <div class="container">
 
-    <h1>PiGLy 体重管理</h1>
+    {{-- 検索＋追加 --}}
+    <div class="search-wrapper">
+        <form method="GET" action="{{ route('dashboard') }}" class="search-area">
+            <input type="date" name="from" value="{{ request('from') }}">
+            <span>〜</span>
+            <input type="date" name="to" value="{{ request('to') }}">
+            <button type="submit" class="search-btn">検索</button>
 
-    {{-- ===== 検索フォーム ===== --}}
-    <form method="GET" action="{{ route('dashboard') }}" class="search-area">
-        <input type="date" name="from" value="{{ request('from') }}">
-        <span>〜</span>
-        <input type="date" name="to" value="{{ request('to') }}">
-        <button type="submit" class="search-btn">検索</button>
+            @if(request()->filled('from') || request()->filled('to'))
+                <a href="{{ route('dashboard') }}" class="reset-btn">リセット</a>
+            @endif
+        </form>
 
-        {{-- 検索中のみ表示 --}}
-        @if(request()->filled('from') || request()->filled('to'))
-            <a href="{{ route('dashboard') }}" class="reset-btn">リセット</a>
-        @endif
-    </form>
+        <a href="{{ route('logs.create') }}" class="add-btn">データ追加</a>
+    </div>
 
-    {{-- ===== 検索結果表示 ===== --}}
+    {{-- 検索結果 --}}
     @if(request()->filled('from') || request()->filled('to'))
         <p class="result-text">
-            {{ request('from') ?: '最初' }}
-            〜
-            {{ request('to') ?: '最新' }}
-            の検索結果　{{ $totalCount }}件
+            {{ request('from') }}〜{{ request('to') }}の検索結果 {{ $totalCount }}件
         </p>
     @endif
 
-    {{-- ===== サマリー ===== --}}
+    {{-- サマリー --}}
     <div class="summary">
         <div class="summary-box">
             <p>目標体重</p>
-            <p class="summary-value">
-                {{ $targetWeight !== null ? number_format($targetWeight, 1) : '-' }}kg
-            </p>
+            <p class="summary-value">{{ number_format($targetWeight,1) }}kg</p>
         </div>
 
         <div class="summary-box">
             <p>目標まで</p>
-            <p class="summary-value">
-                {{ $diffToTarget !== null ? number_format($diffToTarget, 1) : '-' }}kg
-            </p>
+            <p class="summary-value">{{ number_format($diffToTarget,1) }}kg</p>
         </div>
 
         <div class="summary-box">
             <p>最新体重</p>
-            <p class="summary-value">
-                {{ $latestWeight !== null ? number_format($latestWeight, 1) : '-' }}kg
-            </p>
+            <p class="summary-value">{{ number_format($latestWeight,1) }}kg</p>
         </div>
     </div>
 
-    {{-- ===== 一覧 ===== --}}
+    {{-- 一覧 --}}
     <table>
         <thead>
         <tr>
@@ -188,36 +230,22 @@
         </thead>
 
         <tbody>
-        @forelse($logs as $log)
+        @foreach($logs as $log)
             <tr>
                 <td>{{ $log->date->format('Y/m/d') }}</td>
-                <td>{{ number_format($log->weight, 1) }}kg</td>
+                <td>{{ number_format($log->weight,1) }}kg</td>
                 <td>{{ $log->calories }}cal</td>
-                <td>
-                    @php
-                        $h = intdiv($log->exercise_minutes, 60);
-                        $m = $log->exercise_minutes % 60;
-                    @endphp
-                    {{ sprintf('%02d:%02d', $h, $m) }}
-                </td>
-                <td>
-                    <a href="/logs/{{ $log->id }}/edit" class="edit-btn">✏️</a>
-                </td>
+                <td>{{ sprintf('%02d:%02d', intdiv($log->exercise_minutes,60), $log->exercise_minutes%60) }}</td>
+                <td><a href="{{ route('logs.edit', $log) }}" class="edit-btn">✏️</a></td>
             </tr>
-        @empty
-            <tr>
-                <td colspan="5">データがありません</td>
-            </tr>
-        @endforelse
+        @endforeach
         </tbody>
     </table>
 
-    {{-- ===== ページネーション ===== --}}
-    <div class="pagination">
-        {{ $logs->links() }}
-    </div>
+    {{ $logs->links() }}
 
 </div>
-
 </body>
 </html>
+
+
