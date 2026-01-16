@@ -236,7 +236,10 @@
                 <td>{{ number_format($log->weight,1) }}kg</td>
                 <td>{{ $log->calories }}cal</td>
                 <td>{{ sprintf('%02d:%02d', intdiv($log->exercise_minutes,60), $log->exercise_minutes%60) }}</td>
-                <td><a href="{{ route('logs.edit', $log) }}" class="edit-btn">✏️</a></td>
+                <td>
+                    <a href="{{ route('logs.edit', $log) }}?redirect_to={{ urlencode(request()->fullUrl()) }}" class="edit-btn">✏️</a>
+                </td>
+
             </tr>
         @endforeach
         </tbody>
