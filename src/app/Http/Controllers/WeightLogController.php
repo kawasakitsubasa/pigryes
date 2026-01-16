@@ -175,7 +175,8 @@ class WeightLogController extends Controller
          'exercise_content' => $validated['exercise_content'] ?? null,
         ]);
 
-        return redirect()->route('dashboard');
+        return redirect($request->input('redirect_to', route('dashboard')));
+
     }
 
     public function destroy(WeightLog $log)

@@ -2,25 +2,36 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\RegisterController;
+
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WeightLogController;
 use App\Http\Controllers\WeightTargetController;
 
 /*
 |--------------------------------------------------------------------------
-| 認証不要
+| 認証不要（ログイン前）
 |--------------------------------------------------------------------------
 */
 
 // 新規会員登録（STEP1）
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
-Route::post('/register', [RegisterController::class, 'store']);
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+// 新規会員登録（STEP2）
+Route::get('/register/step2', [RegisterController::class, 'step2'])->name('register.step2');
+Route::post('/register/step2', [RegisterController::class, 'storeStep2'])->name('register.step2.store');
+
+// 登録完了
+Route::get('/register/complete', function () {
+    return view('auth.register_complete');
+})->name('register.complete');
 
 // ログイン
 Route::get('/login', [LoginController::class, 'show'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
 /*
 |--------------------------------------------------------------------------
@@ -30,10 +41,9 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::middleware('auth')->group(function () {
 
     // ダッシュボード（体重管理トップ）
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // ログアウト（Auth を使う）
+    // ログアウト（Authを使う）
     Route::post('/logout', function () {
         Auth::logout();
         return redirect()->route('login');
@@ -46,24 +56,16 @@ Route::middleware('auth')->group(function () {
     */
 
     // 追加画面
-    Route::get('/logs/create', [WeightLogController::class, 'create'])
-        ->name('logs.create');
-
+    Route::get('/logs/create', [WeightLogController::class, 'create'])->name('logs.create');
     // 追加保存
-    Route::post('/logs', [WeightLogController::class, 'store'])
-        ->name('logs.store');
+    Route::post('/logs', [WeightLogController::class, 'store'])->name('logs.store');
 
     // 編集画面（えんぴつ）
-    Route::get('/logs/{log}/edit', [WeightLogController::class, 'edit'])
-        ->name('logs.edit');
-
+    Route::get('/logs/{log}/edit', [WeightLogController::class, 'edit'])->name('logs.edit');
     // 更新
-    Route::put('/logs/{log}', [WeightLogController::class, 'update'])
-        ->name('logs.update');
-
+    Route::put('/logs/{log}', [WeightLogController::class, 'update'])->name('logs.update');
     // 削除
-    Route::delete('/logs/{log}', [WeightLogController::class, 'destroy'])
-        ->name('logs.destroy');
+    Route::delete('/logs/{log}', [WeightLogController::class, 'destroy'])->name('logs.destroy');
 
     /*
     |--------------------------------------------------------------------------
@@ -72,17 +74,14 @@ Route::middleware('auth')->group(function () {
     */
 
     // 目標体重設定画面
-    Route::get('/target/edit', [WeightTargetController::class, 'edit'])
-        ->name('target.edit');
-
+    Route::get('/target/edit', [WeightTargetController::class, 'edit'])->name('target.edit');
     // 目標体重更新
-    Route::put('/target', [WeightTargetController::class, 'update'])
-        ->name('target.update');
+    Route::put('/target', [WeightTargetController::class, 'update'])->name('target.update');
 });
 
 /*
 |--------------------------------------------------------------------------
-| トップアクセス時のリダイレクト
+| トップアクセス時
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
